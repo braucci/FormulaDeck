@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FormulaDeck — Editor di equazioni LaTeX | Blog di Biagio Raucci</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg:         #FAFAFA;
+    --surface:    #FFFFFF;
+    --surface-2:  #F5F5F4;
+    --border:     #E5E7EB;
+    --text:       #0A0A0A;
+    --text-2:     #3F3F46;
+    --text-3:     #71717A;
+    --text-mute:  #A1A1AA;
+    --accent:     #0d9488;
+    --accent-soft:#CCFBF1;
+    --accent-dark:#0F766E;
+    --radius:     8px;
+    --radius-lg:  12px;
+    --shadow:     0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-lg:  0 10px 25px -5px rgba(0,0,0,0.07), 0 8px 10px -6px rgba(0,0,0,0.03);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ===== HEADER ISTITUZIONALE ===== */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+  }
+  .header-inner {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 18px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .header-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: var(--text);
+  }
+  .header-brand .avatar {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    background: var(--accent);
+    color: white;
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    font-size: 15px;
+  }
+  .header-brand .site-name {
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: -0.01em;
+  }
+  .header-brand .site-sub {
+    font-size: 12px;
+    color: var(--text-3);
+    font-weight: 400;
+  }
+  .header-nav {
+    display: flex;
+    gap: 6px;
+  }
+  .header-nav a {
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-2);
+    text-decoration: none;
+    transition: all 0.12s;
+  }
+  .header-nav a:hover {
+    background: var(--surface-2);
+    color: var(--text);
+  }
+  .header-nav a.active {
+    background: var(--accent-soft);
+    color: var(--accent-dark);
+  }
+
+  /* ===== ARTICLE ===== */
+  .article-wrapper {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  /* Breadcrumb */
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 24px;
+    font-size: 13px;
+    color: var(--text-mute);
+  }
+  .breadcrumb a {
+    color: var(--text-3);
+    text-decoration: none;
+  }
+  .breadcrumb a:hover { color: var(--accent); text-decoration: underline; }
+  .breadcrumb .sep { font-size: 11px; }
+
+  /* Meta */
+  .article-meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .meta-badge {
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .meta-badge.tool { background: var(--accent-soft); color: var(--accent-dark); }
+  .meta-badge.date { background: var(--surface-2); color: var(--text-3); border: 1px solid var(--border); }
+  .meta-badge.reading { background: var(--surface-2); color: var(--text-3); border: 1px solid var(--border); }
+
+  /* Titolo */
+  h1 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+    margin-bottom: 14px;
+    color: var(--text);
+  }
+  .subtitle {
+    font-size: 1.15rem;
+    color: var(--text-2);
+    line-height: 1.55;
+    margin-bottom: 36px;
+    max-width: 640px;
+  }
+
+  /* Immagine hero / screenshot placeholder */
+  .hero-img {
+    width: 100%;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
+    margin-bottom: 40px;
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .hero-img .placeholder-screen {
+    background:
+      linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
+    padding: 48px 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+  }
+  .hero-img .placeholder-screen .logo-big {
+    width: 56px; height: 56px;
+    border-radius: 14px;
+    background: var(--text);
+    color: white;
+    display: grid; place-items: center;
+    font-weight: 700;
+    font-size: 24px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .hero-img .placeholder-screen .tagline {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+  .hero-img .placeholder-screen .tagline-sub {
+    font-size: 14px;
+    color: var(--text-3);
+    max-width: 420px;
+  }
+
+  /* Corpo testo */
+  .prose h2 {
+    font-size: 1.35rem;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    margin: 36px 0 14px;
+    color: var(--text);
+  }
+  .prose h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 28px 0 10px;
+    color: var(--text);
+  }
+  .prose p {
+    margin-bottom: 18px;
+    color: var(--text-2);
+  }
+  .prose strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+  .prose em {
+    font-style: italic;
+  }
+  .prose code {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.88em;
+    color: var(--accent-dark);
+  }
+  .prose ul, .prose ol {
+    margin: 0 0 18px 24px;
+    color: var(--text-2);
+  }
+  .prose li {
+    margin-bottom: 6px;
+  }
+  .prose li::marker {
+    color: var(--accent);
+  }
+  .prose blockquote {
+    margin: 24px 0;
+    padding: 16px 20px;
+    border-left: 3px solid var(--accent);
+    background: var(--accent-soft);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    font-size: 0.95rem;
+    color: var(--text-2);
+  }
+
+  /* Tabella feature */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+    margin: 24px 0 32px;
+  }
+  .feature-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    transition: all 0.15s;
+  }
+  .feature-card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  .feature-card .fc-icon {
+    font-size: 22px;
+    margin-bottom: 8px;
+    display: block;
+    line-height: 1;
+  }
+  .feature-card .fc-title {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 4px;
+    color: var(--text);
+  }
+  .feature-card .fc-desc {
+    font-size: 13px;
+    color: var(--text-3);
+    line-height: 1.45;
+  }
+
+  /* CTA button */
+  .cta-section {
+    margin: 40px 0 24px;
+    padding: 32px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    text-align: center;
+    box-shadow: var(--shadow);
+  }
+  .cta-section h3 {
+    margin: 0 0 8px;
+    font-size: 1.15rem;
+    letter-spacing: -0.01em;
+  }
+  .cta-section p {
+    color: var(--text-3);
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+  .cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 28px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s;
+    box-shadow: 0 1px 3px rgba(13, 148, 136, 0.3);
+  }
+  .cta-btn:hover {
+    background: var(--accent-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+  }
+  .cta-btn svg { width: 18px; height: 18px; }
+
+  .cta-sub {
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--text-mute);
+  }
+  .cta-sub a { color: var(--accent); text-decoration: none; }
+  .cta-sub a:hover { text-decoration: underline; }
+
+  /* Stack tecnico */
+  .tech-stack {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 12px 0 24px;
+  }
+  .tech-tag {
+    padding: 4px 12px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-2);
+    font-weight: 500;
+  }
+
+  /* Footer */
+  .footer {
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    padding: 24px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-mute);
+  }
+  .footer a { color: var(--text-3); text-decoration: none; }
+  .footer a:hover { color: var(--accent); }
+
+  @media (max-width: 640px) {
+    h1 { font-size: 1.65rem; }
+    .subtitle { font-size: 1rem; }
+    .article-wrapper { padding: 32px 16px 60px; }
+    .feature-grid { grid-template-columns: 1fr; }
+    .hero-img .placeholder-screen { padding: 32px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <a class="header-brand" href="#">
+      <div class="avatar">BR</div>
+      <div>
+        <div class="site-name">Biagio Raucci</div>
+        <div class="site-sub">Costruzioni Aeronautiche · ITIS E. Majorana</div>
+      </div>
+    </a>
+    <nav class="header-nav">
+      <a href="#">Home</a>
+      <a href="#" class="active">Blog</a>
+      <a href="#">CFD Lab</a>
+      <a href="#">Contatti</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ARTICOLO -->
+<article class="article-wrapper">
+
+  <div class="breadcrumb">
+    <a href="#">Home</a>
+    <span class="sep">›</span>
+    <a href="#">Blog</a>
+    <span class="sep">›</span>
+    <span>FormulaDeck</span>
+  </div>
+
+  <div class="article-meta">
+    <span class="meta-badge tool">Strumento didattico</span>
+    <span class="meta-badge date">Maggio 2026</span>
+    <span class="meta-badge reading">4 min di lettura</span>
+  </div>
+
+  <h1>FormulaDeck: un editor di equazioni visuale con output LaTeX in tempo reale</h1>
+
+  <p class="subtitle">
+    Uno strumento gratuito e open source, pensato per studenti e docenti che hanno bisogno di comporre formule matematiche complesse senza imparare prima la sintassi LaTeX — ma ottenendo comunque codice LaTeX pulito e compilabile.
+  </p>
+
+  <!-- HERO -->
+  <div class="hero-img">
+    <div class="placeholder-screen">
+      <div class="logo-big">∑</div>
+      <div class="tagline">FormulaDeck</div>
+      <div class="tagline-sub">Componi visualmente. Copia in LaTeX. Nessuna installazione richiesta.</div>
+    </div>
+  </div>
+
+  <!-- CORPO -->
+  <div class="prose">
+
+    <h2>Perché un altro editor di equazioni?</h2>
+
+    <p>
+      Chi insegna discipline tecniche — dalla meccanica del volo alla fluidodinamica computazionale — conosce bene il problema: le formule sono il linguaggio con cui comunichiamo, ma gli strumenti per scriverle oscillano tra due estremi. Da un lato ci sono editor visuali come <strong>MathType</strong> e <strong>Equation Editor</strong>, intuitivi ma chiusi (formati proprietari, licenze costose, nessun output LaTeX diretto). Dall'altro c'è LaTeX puro, potentissimo ma con una curva di apprendimento che scoraggia gli studenti alle prime armi.
+    </p>
+
+    <p>
+      <strong>FormulaDeck</strong> nasce per occupare esattamente lo spazio tra i due: un editor visuale WYSIWYG che produce codice LaTeX in tempo reale, direttamente nel browser, senza installare nulla. Lo studente vede la formula prendere forma mentre la compone, e quando ha finito ha già pronto il sorgente LaTeX da incollare nella sua relazione o nella dispensa.
+    </p>
+
+    <h2>Cosa offre</h2>
+
+    <div class="feature-grid">
+      <div class="feature-card">
+        <span class="fc-icon">✏️</span>
+        <div class="fc-title">Composizione visuale</div>
+        <div class="fc-desc">Scrivi formule cliccando su template o digitando comandi LaTeX. Il campo di editing è un vero editor matematico con navigazione a cursore.</div>
+      </div>
+      <div class="feature-card">
+        <span class="fc-icon">📋</span>
+        <div class="fc-title">Output LaTeX istantaneo</div>
+        <div class="fc-desc">Il codice sorgente viene aggiornato a ogni battitura. Copia con un clic in formato raw, inline <code>$…$</code> o display <code>$$…$$</code>.</div>
+      </div>
+      <div class="feature-card">
+        <span class="fc-icon">📐</span>
+        <div class="fc-title">Matrici e sistemi</div>
+        <div class="fc-desc">Supporto nativo per pmatrix, bmatrix, vmatrix, determinanti e sistemi di equazioni (cases). Ogni cella è editabile con Tab per navigare.</div>
+      </div>
+      <div class="feature-card">
+        <span class="fc-icon">🔍</span>
+        <div class="fc-title">Ricerca simboli</div>
+        <div class="fc-desc">Oltre 160 simboli organizzati in 7 categorie con ricerca istantanea. Trova <code>\mathbb{R}</code> cercando "reali" o "ℝ".</div>
+      </div>
+      <div class="feature-card">
+        <span class="fc-icon">↓</span>
+        <div class="fc-title">Import LaTeX</div>
+        <div class="fc-desc">Incolla un'espressione LaTeX esistente: viene caricata nell'editor visuale e diventa immediatamente modificabile, matrici incluse.</div>
+      </div>
+      <div class="feature-card">
+        <span class="fc-icon">👁️</span>
+        <div class="fc-title">Anteprima MathJax</div>
+        <div class="fc-desc">Un pannello di preview renderizza la formula esattamente come apparirà in un documento LaTeX compilato.</div>
+      </div>
+    </div>
+
+    <h2>Sette palette tematiche</h2>
+
+    <p>
+      I simboli e i template sono organizzati in categorie pensate per l'uso quotidiano nelle discipline tecniche:
+    </p>
+
+    <ul>
+      <li><strong>Algebra</strong> — frazioni, radicali, potenze, pedici, binomiali, relazioni d'ordine, operatori aritmetici</li>
+      <li><strong>Calcolo</strong> — limiti, derivate ordinarie e parziali, integrali (singoli, doppi, tripli, circuitali), sommatorie, produttorie, nabla</li>
+      <li><strong>Lettere greche</strong> — alfabeto completo, minuscole e maiuscole</li>
+      <li><strong>Logica e insiemi</strong> — quantificatori, appartenenza, operazioni insiemistiche, connettivi logici, insiemi numerici (<code>ℕ</code>, <code>ℤ</code>, <code>ℚ</code>, <code>ℝ</code>, <code>ℂ</code>)</li>
+      <li><strong>Matrici</strong> — pmatrix, bmatrix, vmatrix (determinanti), sistemi, vettori riga e colonna, trasposta, inversa</li>
+      <li><strong>Funzioni</strong> — trigonometriche, iperboliche, logaritmiche, esponenziale, estremi</li>
+      <li><strong>Frecce e accenti</strong> — frecce semplici e doppie, hat, tilde, bar, overline, dot, vec, overrightarrow</li>
+    </ul>
+
+    <h2>Come nasce e lo stack tecnico</h2>
+
+    <p>
+      FormulaDeck è stato sviluppato per il corso di Costruzioni Aeronautiche dell'ITIS E. Majorana di Cassino, dove la necessità di scrivere formule in LaTeX per le dispense e le verifiche è quotidiana. Il motore di editing è <strong>MathLive</strong>, una libreria open source creata da Arno Gourdol (co-autore del MathType originale), che supporta nativamente gli ambienti AMSmath, <code>\mathbb</code>, <code>\overrightarrow</code> e la quasi totalità del LaTeX standard. L'anteprima è renderizzata con <strong>MathJax 3</strong>.
+    </p>
+
+    <div class="tech-stack">
+      <span class="tech-tag">MathLive 0.101</span>
+      <span class="tech-tag">MathJax 3.2</span>
+      <span class="tech-tag">HTML5 / CSS3 / JS</span>
+      <span class="tech-tag">Zero dipendenze server</span>
+      <span class="tech-tag">Open Source</span>
+    </div>
+
+    <p>
+      L'applicazione è interamente client-side: un singolo file HTML che funziona aprendo il browser. Non richiede server, account, installazione. Funziona offline dopo il primo caricamento. È pensata per essere usata su un tablet in classe, su un portatile durante lo studio, o su un desktop per preparare una dispensa.
+    </p>
+
+    <blockquote>
+      Uno strumento didattico deve abbassare la soglia di ingresso, non alzarla. Se uno studente riesce a scrivere l'equazione di Bernoulli in LaTeX prima ancora di conoscerne la sintassi, ha fatto il primo passo verso un flusso di lavoro professionale che userà per tutta la carriera.
+    </blockquote>
+
+    <h2>Uso suggerito</h2>
+
+    <p>
+      Puoi usare FormulaDeck come complemento alla scrittura di relazioni tecniche in LaTeX, per preparare esercizi e verifiche, o semplicemente come riferimento visivo ai simboli matematici e alla loro corrispondenza LaTeX. L'import permette anche il percorso inverso: hai un sorgente LaTeX e vuoi capire visivamente cosa rappresenta? Incollalo e vedrai la formula renderizzata e navigabile.
+    </p>
+
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-section">
+    <h3>Prova FormulaDeck</h3>
+    <p>Gratuito, open source, nessuna registrazione. Funziona direttamente nel browser.</p>
+    <!-- ================================================
+         ISTRUZIONI: sostituisci l'URL qui sotto con il link
+         reale della tua GitHub Page, es.:
+         https://braucci.github.io/formuladeck/equation-editor.html
+         ================================================ -->
+    <a class="cta-btn" href="https://braucci.github.io/formuladeck/equation-editor.html" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+        <polyline points="15 3 21 3 21 9"/>
+        <line x1="10" y1="14" x2="21" y2="3"/>
+      </svg>
+      Apri FormulaDeck
+    </a>
+    <p class="cta-sub">
+      Codice sorgente su <a href="https://github.com/braucci/formuladeck" target="_blank" rel="noopener">GitHub</a> · Licenza MIT
+    </p>
+  </div>
+
+</article>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <p>
+    © 2026 Biagio Raucci · Prof. Ing. · Costruzioni Aeronautiche · ITIS E. Majorana, Cassino
+    <br>
+    <a href="#">braucci.github.io</a>
+  </p>
+</footer>
+
+</body>
+</html>
