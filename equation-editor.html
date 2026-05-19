@@ -1,0 +1,1529 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FormulaDeck</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/mathlive@0.101.0/mathlive.min.js"></script>
+<script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      packages: { '[+]': ['ams'] }
+    },
+    svg: { fontCache: 'global' },
+    loader: { load: ['[tex]/ams'] }
+  };
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js" id="MathJax-script" async></script>
+
+<style>
+  :root {
+    /* Superfici */
+    --bg:           #FAFAFA;
+    --surface:      #FFFFFF;
+    --surface-2:    #F5F5F4;
+    --surface-3:    #EFEFED;
+
+    /* Bordi */
+    --border:       #E5E7EB;
+    --border-strong:#D1D5DB;
+    --border-hot:   #9CA3AF;
+
+    /* Testo */
+    --text:         #0A0A0A;
+    --text-2:       #3F3F46;
+    --text-3:       #71717A;
+    --text-mute:    #A1A1AA;
+
+    /* Accento (blu Linear-style) */
+    --accent:       #2563EB;
+    --accent-soft:  #DBEAFE;
+    --accent-hover: #1D4ED8;
+
+    /* Stato */
+    --success:      #10B981;
+    --success-soft: #D1FAE5;
+    --error:        #EF4444;
+    --error-soft:   #FEE2E2;
+
+    /* Dimensioni layout */
+    --sidebar-w:    280px;
+    --sidebar-w-collapsed: 56px;
+    --radius:       8px;
+    --radius-sm:    6px;
+    --radius-lg:    12px;
+
+    /* Ombre soft */
+    --shadow-sm:    0 1px 2px rgba(0,0,0,0.04);
+    --shadow:       0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-lg:    0 10px 25px -5px rgba(0,0,0,0.08), 0 8px 10px -6px rgba(0,0,0,0.04);
+
+    /* Transizioni */
+    --t-fast:       120ms cubic-bezier(0.4, 0, 0.2, 1);
+    --t-base:       180ms cubic-bezier(0.4, 0, 0.2, 1);
+    --t-slow:       240ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow: hidden;
+  }
+
+  /* ================= LAYOUT PRINCIPALE ================= */
+  .app {
+    display: grid;
+    grid-template-columns: var(--sidebar-w) 1fr;
+    height: 100vh;
+    transition: grid-template-columns var(--t-base);
+  }
+  .app.sidebar-collapsed {
+    grid-template-columns: var(--sidebar-w-collapsed) 1fr;
+  }
+
+  /* ================= SIDEBAR ================= */
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: all var(--t-base);
+  }
+
+  .sidebar-header {
+    padding: 20px 20px 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-height: 60px;
+  }
+  .sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    overflow: hidden;
+  }
+  .sidebar-brand .logo {
+    width: 28px; height: 28px;
+    border-radius: 7px;
+    background: var(--text);
+    color: var(--surface);
+    display: grid; place-items: center;
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+    font-family: 'Inter', sans-serif;
+  }
+  .sidebar-brand .name {
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+  }
+  .sidebar-brand .name .sub {
+    color: var(--text-3);
+    font-weight: 400;
+  }
+  .app.sidebar-collapsed .sidebar-brand .name,
+  .app.sidebar-collapsed .sidebar-search,
+  .app.sidebar-collapsed .category-label,
+  .app.sidebar-collapsed .category-items,
+  .app.sidebar-collapsed .sidebar-footer-text {
+    display: none;
+  }
+
+  .sidebar-toggle {
+    width: 28px; height: 28px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: grid; place-items: center;
+    color: var(--text-3);
+    transition: all var(--t-fast);
+    flex-shrink: 0;
+  }
+  .sidebar-toggle:hover {
+    background: var(--surface-2);
+    color: var(--text);
+    border-color: var(--border);
+  }
+  .sidebar-toggle svg { width: 16px; height: 16px; }
+
+  /* Search input */
+  .sidebar-search {
+    padding: 0 16px 12px 16px;
+  }
+  .sidebar-search input {
+    width: 100%;
+    padding: 7px 10px 7px 32px;
+    background: var(--surface-2);
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    font: inherit;
+    font-size: 13px;
+    color: var(--text);
+    outline: none;
+    transition: all var(--t-fast);
+  }
+  .sidebar-search {
+    position: relative;
+  }
+  .sidebar-search::before {
+    content: '';
+    position: absolute;
+    left: 26px;
+    top: 50%;
+    transform: translateY(-50%) translateY(-6px);
+    width: 14px; height: 14px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='%2371717A'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z'/%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+    pointer-events: none;
+  }
+  .sidebar-search input::placeholder { color: var(--text-mute); }
+  .sidebar-search input:focus {
+    background: var(--surface);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  /* Categorie (accordion) */
+  .sidebar-categories {
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px 8px 12px 8px;
+  }
+
+  .category {
+    margin-bottom: 2px;
+  }
+  .category-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 10px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background var(--t-fast);
+    user-select: none;
+    color: var(--text-2);
+  }
+  .category-header:hover { background: var(--surface-2); }
+  .category.active .category-header {
+    color: var(--text);
+    background: var(--surface-2);
+  }
+  .category-icon {
+    width: 18px; height: 18px;
+    flex-shrink: 0;
+    display: grid; place-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-3);
+  }
+  .category.active .category-icon { color: var(--accent); }
+  .category-label {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .category-chevron {
+    width: 14px; height: 14px;
+    color: var(--text-mute);
+    transition: transform var(--t-fast);
+    flex-shrink: 0;
+  }
+  .category.active .category-chevron { transform: rotate(90deg); color: var(--text-3); }
+
+  /* Quando la sidebar è collassata, mostriamo solo le icone come dock cliccabile */
+  .app.sidebar-collapsed .category-header {
+    justify-content: center;
+    padding: 9px 0;
+  }
+  .app.sidebar-collapsed .category-chevron { display: none; }
+  .app.sidebar-collapsed .category-icon {
+    font-size: 14px;
+  }
+
+  .category-items {
+    display: none;
+    padding: 4px 0 8px 30px;
+    gap: 1px;
+    flex-direction: column;
+  }
+  .category.active .category-items { display: flex; }
+
+  .symbol-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    text-align: left;
+    color: var(--text-2);
+    transition: all var(--t-fast);
+    font: inherit;
+    width: 100%;
+  }
+  .symbol-btn:hover {
+    background: var(--surface-2);
+    color: var(--text);
+  }
+  .symbol-btn:active {
+    background: var(--accent-soft);
+  }
+  .symbol-btn .glyph {
+    min-width: 26px;
+    text-align: center;
+    color: var(--text);
+    font-family: 'Times New Roman', 'Computer Modern', serif;
+    font-size: 16px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .symbol-btn .label {
+    flex: 1;
+    font-size: 12.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .sidebar-footer {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    font-size: 11.5px;
+    color: var(--text-3);
+  }
+  .sidebar-footer-text {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .sidebar-footer .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--success);
+  }
+
+  /* ================= MAIN CONTENT ================= */
+  .main {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .topbar {
+    height: 56px;
+    padding: 0 28px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .topbar-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .topbar-title h1 {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .topbar-title .badge {
+    padding: 2px 8px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-3);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .topbar-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  /* Pulsanti uniformi (ghost / primary) */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-2);
+    cursor: pointer;
+    transition: all var(--t-fast);
+    white-space: nowrap;
+  }
+  .btn:hover {
+    background: var(--surface-2);
+    border-color: var(--border-strong);
+    color: var(--text);
+  }
+  .btn:active { background: var(--surface-3); }
+  .btn:focus-visible {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  .btn.primary {
+    background: var(--text);
+    border-color: var(--text);
+    color: var(--surface);
+  }
+  .btn.primary:hover {
+    background: #1F1F1F;
+    border-color: #1F1F1F;
+  }
+  .btn.accent {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+  .btn.accent:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+  }
+  .btn .icon {
+    width: 14px; height: 14px;
+  }
+  .kbd {
+    display: inline-block;
+    padding: 1px 5px;
+    margin-left: 4px;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: inherit;
+  }
+  .btn:not(.primary):not(.accent) .kbd {
+    background: var(--surface-2);
+    border-color: var(--border);
+    color: var(--text-3);
+  }
+
+  /* Content area */
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  /* Card uniforme */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-2);
+    letter-spacing: -0.005em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title .dot-accent {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .card-actions {
+    display: flex; gap: 6px;
+  }
+  .card-body { padding: 20px; }
+  .card-body.compact { padding: 0; }
+
+  /* Editor MathLive */
+  math-field {
+    display: block;
+    width: 100%;
+    min-height: 140px;
+    padding: 24px 20px;
+    background: var(--surface);
+    border: none;
+    border-radius: 0;
+    font-size: 24px;
+    color: var(--text);
+    outline: none;
+
+    --primary: #2563EB;
+    --caret-color: #0A0A0A;
+    --selection-background-color: #DBEAFE;
+    --selection-color: #0A0A0A;
+    --contains-highlight-background-color: #EFF6FF;
+    --smart-fence-color: #0A0A0A;
+    --smart-fence-opacity: 1;
+    --keyboard-toggle-color: transparent;
+    --highlight-text: #0A0A0A;
+    --placeholder-color: #A1A1AA;
+    --placeholder-opacity: 1;
+  }
+  math-field::part(virtual-keyboard-toggle),
+  math-field::part(menu-toggle) {
+    display: none;
+  }
+  math-field:focus { outline: none; }
+
+  /* Output LaTeX */
+  #latex-out {
+    width: 100%;
+    min-height: 110px;
+    padding: 14px 18px;
+    background: #FAFAF9;
+    border: none;
+    font-family: 'JetBrains Mono', 'Menlo', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text);
+    outline: none;
+    resize: vertical;
+  }
+  #latex-out::placeholder { color: var(--text-mute); }
+
+  /* Preview MathJax */
+  #preview {
+    background: var(--surface);
+    padding: 36px 24px;
+    min-height: 80px;
+    font-size: 24px;
+    text-align: center;
+    color: var(--text);
+    overflow-x: auto;
+  }
+  #preview .placeholder {
+    color: var(--text-mute);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-style: normal;
+  }
+
+  /* Status bar minimale in fondo */
+  .statusbar {
+    padding: 8px 28px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-size: 12px;
+    color: var(--text-3);
+    flex-shrink: 0;
+  }
+  .status-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .status-item b {
+    color: var(--text-2);
+    font-weight: 500;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+  }
+  .status-item .ico {
+    width: 12px; height: 12px;
+    color: var(--text-mute);
+  }
+  .status-spacer { flex: 1; }
+
+  /* ================= MODALI ================= */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 10, 10, 0.4);
+    backdrop-filter: blur(2px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn var(--t-base);
+  }
+  .modal-overlay.show { display: flex; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .modal {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    min-width: 460px;
+    max-width: 580px;
+    width: 92%;
+    overflow: hidden;
+    animation: scaleIn var(--t-base);
+  }
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  .modal-header {
+    padding: 18px 24px 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-header h2 {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .modal-close {
+    background: transparent;
+    border: none;
+    width: 28px; height: 28px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    color: var(--text-3);
+    display: grid; place-items: center;
+    transition: all var(--t-fast);
+  }
+  .modal-close:hover {
+    background: var(--surface-2);
+    color: var(--text);
+  }
+  .modal-body { padding: 20px 24px; }
+  .modal-body p {
+    font-size: 13px;
+    color: var(--text-2);
+    line-height: 1.55;
+    margin-bottom: 12px;
+  }
+  .modal-body label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-2);
+    margin-bottom: 6px;
+  }
+  .modal-body textarea, .modal-body input[type=number], .modal-body select {
+    width: 100%;
+    padding: 9px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font: inherit;
+    font-size: 13px;
+    color: var(--text);
+    outline: none;
+    transition: all var(--t-fast);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .modal-body textarea {
+    min-height: 100px;
+    resize: vertical;
+    line-height: 1.55;
+  }
+  .modal-body textarea:focus,
+  .modal-body input:focus,
+  .modal-body select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  .modal-body .hint {
+    font-size: 12px;
+    color: var(--text-3);
+    margin-top: 10px;
+    line-height: 1.5;
+  }
+  .modal-body code {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    color: var(--text);
+  }
+  .modal-body kbd {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-2);
+    font-weight: 500;
+  }
+  .modal-footer {
+    padding: 14px 24px;
+    border-top: 1px solid var(--border);
+    background: var(--surface-2);
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  /* Form layout matrice */
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .form-row.full { grid-template-columns: 1fr; }
+  .checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .checkbox-row input[type=checkbox] {
+    width: 15px; height: 15px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+  .checkbox-row label {
+    margin-bottom: 0;
+    cursor: pointer;
+    font-weight: 400;
+    color: var(--text);
+  }
+
+  /* ================= TOAST ================= */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translate(-50%, 20px);
+    background: var(--text);
+    color: var(--surface);
+    padding: 10px 18px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 500;
+    opacity: 0;
+    pointer-events: none;
+    transition: all var(--t-base);
+    z-index: 2000;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+  .toast.error { background: var(--error); }
+  .toast.success { background: var(--success); }
+  .toast::before {
+    content: '✓';
+    font-weight: 700;
+    font-size: 12px;
+  }
+  .toast.error::before { content: '⚠'; }
+
+  /* Scrollbar pulita */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: 5px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--border-hot);
+    background-clip: padding-box;
+    border: 2px solid transparent;
+  }
+
+  /* Responsive: su mobile chiudi automaticamente la sidebar */
+  @media (max-width: 768px) {
+    .app { grid-template-columns: var(--sidebar-w-collapsed) 1fr; }
+    .content { padding: 16px; }
+    .topbar { padding: 0 16px; }
+    .statusbar { padding: 8px 16px; flex-wrap: wrap; gap: 12px; }
+    math-field { font-size: 20px; padding: 18px 14px; }
+    #preview { font-size: 20px; padding: 24px 14px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+
+  <!-- ============== SIDEBAR ============== -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-brand">
+        <div class="logo">∑</div>
+        <div class="name">FormulaDeck<br><span class="sub" style="font-size:11.5px">Equation Editor</span></div>
+      </div>
+      <button class="sidebar-toggle" id="sidebar-toggle" title="Comprimi/espandi sidebar (Ctrl+B)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <line x1="9" y1="3" x2="9" y2="21"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="sidebar-search">
+      <input type="text" id="search" placeholder="Cerca simboli…" autocomplete="off">
+    </div>
+
+    <div class="sidebar-categories" id="categories"></div>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-footer-text">
+        <span class="dot"></span>
+        <span>MathLive 0.101 — pronto</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============== MAIN ============== -->
+  <main class="main">
+
+    <div class="topbar">
+      <div class="topbar-title">
+        <h1>Nuova equazione</h1>
+        <span class="badge">LaTeX</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn" id="btn-import">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Importa LaTeX
+        </button>
+        <button class="btn" id="btn-matrix">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <line x1="9" y1="3" x2="9" y2="21"/>
+            <line x1="15" y1="3" x2="15" y2="21"/>
+            <line x1="3" y1="9" x2="21" y2="9"/>
+            <line x1="3" y1="15" x2="21" y2="15"/>
+          </svg>
+          Matrice
+        </button>
+        <button class="btn" id="btn-clear">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 6h18"/>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+          </svg>
+          Cancella
+        </button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- Editor + LaTeX side by side -->
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="dot-accent"></span>
+              Composizione
+            </div>
+            <div class="card-actions">
+              <span style="font-size:11.5px; color: var(--text-mute); font-family:'JetBrains Mono',monospace;">WYSIWYG</span>
+            </div>
+          </div>
+          <div class="card-body compact">
+            <math-field id="mf"></math-field>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="dot-accent" style="background: var(--text-3);"></span>
+              Sorgente LaTeX
+            </div>
+            <div class="card-actions">
+              <button class="btn" id="btn-copy" style="padding: 4px 10px; font-size: 12px;">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+                Copia
+              </button>
+              <button class="btn" id="btn-copy-inline" style="padding: 4px 10px; font-size: 12px; font-family:'JetBrains Mono',monospace;">$…$</button>
+              <button class="btn" id="btn-copy-display" style="padding: 4px 10px; font-size: 12px; font-family:'JetBrains Mono',monospace;">$$…$$</button>
+            </div>
+          </div>
+          <div class="card-body compact">
+            <textarea id="latex-out" readonly placeholder="Il codice LaTeX apparirà qui..."></textarea>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Preview -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="dot-accent" style="background: var(--success);"></span>
+            Anteprima renderizzata
+          </div>
+          <div class="card-actions">
+            <span style="font-size:11.5px; color: var(--text-mute); font-family:'JetBrains Mono',monospace;">MathJax · display</span>
+          </div>
+        </div>
+        <div class="card-body compact">
+          <div id="preview"><span class="placeholder">— nessuna formula —</span></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="statusbar">
+      <div class="status-item">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Pronto
+      </div>
+      <div class="status-item">Motore: <b>MathLive</b></div>
+      <div class="status-item">Stile: <b>Math</b></div>
+      <div class="status-spacer"></div>
+      <div class="status-item">Caratteri: <b id="char-count">0</b></div>
+      <div class="status-item">Biagio Raucci · ITIS Majorana</div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ============== MODALE IMPORT ============== -->
+<div class="modal-overlay" id="modal-import">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Importa espressione LaTeX</h2>
+      <button class="modal-close" data-close-modal="modal-import">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p>Incolla un'espressione LaTeX: verrà caricata nel campo di composizione e sarà immediatamente editabile, comprese matrici e ambienti AMSmath.</p>
+      <label for="import-area">Espressione</label>
+      <textarea id="import-area" placeholder="es.   \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}" spellcheck="false"></textarea>
+      <p class="hint">
+        I delimitatori <code>$…$</code>, <code>$$…$$</code>, <code>\[…\]</code> e <code>\(…\)</code> vengono rimossi automaticamente.
+        Suggerimento: <kbd>Ctrl</kbd>+<kbd>Invio</kbd> per confermare.
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-close-modal="modal-import">Annulla</button>
+      <button class="btn accent" id="btn-import-confirm">Importa</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============== MODALE MATRICE ============== -->
+<div class="modal-overlay" id="modal-matrix">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Inserisci matrice</h2>
+      <button class="modal-close" data-close-modal="modal-matrix">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p>Imposta dimensioni e delimitatore. Dopo l'inserimento, le celle saranno editabili: <kbd>Tab</kbd> per la successiva, <kbd>Shift</kbd>+<kbd>Tab</kbd> per la precedente.</p>
+      <div class="form-row">
+        <div>
+          <label>Righe</label>
+          <input type="number" id="matrix-rows" value="2" min="1" max="10">
+        </div>
+        <div>
+          <label>Colonne</label>
+          <input type="number" id="matrix-cols" value="2" min="1" max="10">
+        </div>
+      </div>
+      <div class="form-row full">
+        <div>
+          <label>Tipo di delimitatore</label>
+          <select id="matrix-type">
+            <option value="pmatrix">( ) tonde — pmatrix</option>
+            <option value="bmatrix">[ ] quadre — bmatrix</option>
+            <option value="vmatrix">| | barre — vmatrix (determinante)</option>
+            <option value="Vmatrix">‖ ‖ doppie — Vmatrix</option>
+            <option value="Bmatrix">{ } graffe — Bmatrix</option>
+            <option value="matrix">nessuno — matrix</option>
+            <option value="cases">{ casi — cases (sistema)</option>
+          </select>
+        </div>
+      </div>
+      <div class="checkbox-row">
+        <input type="checkbox" id="matrix-fill">
+        <label for="matrix-fill">Riempi automaticamente con elementi a<sub>ij</sub></label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-close-modal="modal-matrix">Annulla</button>
+      <button class="btn accent" id="btn-matrix-confirm">Inserisci matrice</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">Copiato negli appunti</div>
+
+<script>
+/* =========================================================================
+   PALETTE - identiche alla versione precedente, con label rinominate per
+   leggibilità nella sidebar.
+   ========================================================================= */
+const PALETTES = {
+  'Algebra': {
+    icon: 'a/b',
+    items: [
+      { tip: 'Frazione',           label: 'Frazione',          glyph: 'a⁄b',  insert: '\\frac{#0}{#?}' },
+      { tip: 'Radice quadrata',    label: 'Radice quadrata',   glyph: '√x',   insert: '\\sqrt{#0}' },
+      { tip: 'Radice n-esima',     label: 'Radice n-esima',    glyph: 'ⁿ√x',  insert: '\\sqrt[#?]{#0}' },
+      { tip: 'Potenza',            label: 'Potenza',           glyph: 'xⁿ',   insert: '#@^{#?}' },
+      { tip: 'Pedice',             label: 'Pedice',            glyph: 'xᵢ',   insert: '#@_{#?}' },
+      { tip: 'Apice e pedice',     label: 'Apice + pedice',    glyph: 'xᵢⁿ',  insert: '#@_{#?}^{#?}' },
+      { tip: 'Parentesi tonde',    label: 'Parentesi tonde',   glyph: '( )',  insert: '(#0)' },
+      { tip: 'Parentesi quadre',   label: 'Parentesi quadre',  glyph: '[ ]',  insert: '[#0]' },
+      { tip: 'Parentesi graffe',   label: 'Parentesi graffe',  glyph: '{ }',  insert: '\\{#0\\}' },
+      { tip: 'Valore assoluto',    label: 'Valore assoluto',   glyph: '|x|',  insert: '\\left|#0\\right|' },
+      { tip: 'Norma',              label: 'Norma',             glyph: '‖x‖',  insert: '\\left\\|#0\\right\\|' },
+      { tip: 'Fattoriale',         label: 'Fattoriale',        glyph: 'n!',   insert: 'n!' },
+      { tip: 'Binomiale',          label: 'Coefficiente binom.', glyph: '(ⁿₖ)', insert: '\\binom{#0}{#?}' },
+      { tip: 'Diverso',            label: 'Diverso da',        glyph: '≠',    insert: '\\neq' },
+      { tip: 'Circa uguale',       label: 'Circa uguale',      glyph: '≈',    insert: '\\approx' },
+      { tip: 'Identico',           label: 'Identico a',        glyph: '≡',    insert: '\\equiv' },
+      { tip: 'Minore o uguale',    label: 'Minore o uguale',   glyph: '≤',    insert: '\\leq' },
+      { tip: 'Maggiore o uguale',  label: 'Maggiore o uguale', glyph: '≥',    insert: '\\geq' },
+      { tip: 'Più o meno',         label: 'Più o meno',        glyph: '±',    insert: '\\pm' },
+      { tip: 'Moltiplicazione',    label: 'Moltiplicazione',   glyph: '×',    insert: '\\times' },
+      { tip: 'Divisione',          label: 'Divisione',         glyph: '÷',    insert: '\\div' },
+      { tip: 'Prodotto puntato',   label: 'Prodotto puntato',  glyph: '·',    insert: '\\cdot' },
+      { tip: 'Infinito',           label: 'Infinito',          glyph: '∞',    insert: '\\infty' },
+    ]
+  },
+  'Calcolo': {
+    icon: '∫',
+    items: [
+      { tip: 'Limite',             label: 'Limite',                glyph: 'lim',   insert: '\\lim_{#0\\to #?}' },
+      { tip: 'Derivata',           label: 'Derivata ordinaria',    glyph: 'dy⁄dx', insert: '\\frac{d#0}{d#?}' },
+      { tip: 'Derivata parziale',  label: 'Derivata parziale',     glyph: '∂y⁄∂x', insert: '\\frac{\\partial #0}{\\partial #?}' },
+      { tip: 'Derivata seconda',   label: 'Derivata seconda',      glyph: 'd²y⁄dx²', insert: '\\frac{d^{2}#0}{d#?^{2}}' },
+      { tip: 'Integrale',          label: 'Integrale indefinito',  glyph: '∫',     insert: '\\int #0\\,d#?' },
+      { tip: 'Integrale definito', label: 'Integrale definito',    glyph: '∫ₐᵇ',   insert: '\\int_{#0}^{#?} #?\\,d#?' },
+      { tip: 'Doppio integrale',   label: 'Integrale doppio',      glyph: '∬',     insert: '\\iint' },
+      { tip: 'Triplo integrale',   label: 'Integrale triplo',      glyph: '∭',     insert: '\\iiint' },
+      { tip: 'Integrale circuit.', label: 'Integrale circuitale',  glyph: '∮',     insert: '\\oint' },
+      { tip: 'Sommatoria',         label: 'Sommatoria',            glyph: 'Σ',     insert: '\\sum' },
+      { tip: 'Σ con limiti',       label: 'Sommatoria con indici', glyph: 'Σⁿᵢ',   insert: '\\sum_{#0=#?}^{#?}' },
+      { tip: 'Produttoria',        label: 'Produttoria',           glyph: '∏',     insert: '\\prod_{#0=#?}^{#?}' },
+      { tip: 'Nabla',              label: 'Nabla / gradiente',     glyph: '∇',     insert: '\\nabla' },
+      { tip: 'Differenziale',      label: 'Differenziale',         glyph: 'd',     insert: 'd' },
+      { tip: 'Parziale',           label: 'Simbolo ∂',             glyph: '∂',     insert: '\\partial' },
+      { tip: 'Tende a',            label: 'Tende a (→)',           glyph: '→',     insert: '\\to' },
+      { tip: 'Implica',            label: 'Implica (⇒)',           glyph: '⇒',     insert: '\\Rightarrow' },
+      { tip: 'Se e solo se',       label: 'Se e solo se (⇔)',      glyph: '⇔',     insert: '\\Leftrightarrow' },
+    ]
+  },
+  'Greche': {
+    icon: 'α',
+    items: [
+      { tip: 'alpha',   label: 'alpha',   glyph: 'α',  insert: '\\alpha' },
+      { tip: 'beta',    label: 'beta',    glyph: 'β',  insert: '\\beta' },
+      { tip: 'gamma',   label: 'gamma',   glyph: 'γ',  insert: '\\gamma' },
+      { tip: 'delta',   label: 'delta',   glyph: 'δ',  insert: '\\delta' },
+      { tip: 'epsilon', label: 'epsilon', glyph: 'ε',  insert: '\\epsilon' },
+      { tip: 'zeta',    label: 'zeta',    glyph: 'ζ',  insert: '\\zeta' },
+      { tip: 'eta',     label: 'eta',     glyph: 'η',  insert: '\\eta' },
+      { tip: 'theta',   label: 'theta',   glyph: 'θ',  insert: '\\theta' },
+      { tip: 'iota',    label: 'iota',    glyph: 'ι',  insert: '\\iota' },
+      { tip: 'kappa',   label: 'kappa',   glyph: 'κ',  insert: '\\kappa' },
+      { tip: 'lambda',  label: 'lambda',  glyph: 'λ',  insert: '\\lambda' },
+      { tip: 'mu',      label: 'mu',      glyph: 'μ',  insert: '\\mu' },
+      { tip: 'nu',      label: 'nu',      glyph: 'ν',  insert: '\\nu' },
+      { tip: 'xi',      label: 'xi',      glyph: 'ξ',  insert: '\\xi' },
+      { tip: 'pi',      label: 'pi',      glyph: 'π',  insert: '\\pi' },
+      { tip: 'rho',     label: 'rho',     glyph: 'ρ',  insert: '\\rho' },
+      { tip: 'sigma',   label: 'sigma',   glyph: 'σ',  insert: '\\sigma' },
+      { tip: 'tau',     label: 'tau',     glyph: 'τ',  insert: '\\tau' },
+      { tip: 'phi',     label: 'phi',     glyph: 'φ',  insert: '\\phi' },
+      { tip: 'chi',     label: 'chi',     glyph: 'χ',  insert: '\\chi' },
+      { tip: 'psi',     label: 'psi',     glyph: 'ψ',  insert: '\\psi' },
+      { tip: 'omega',   label: 'omega',   glyph: 'ω',  insert: '\\omega' },
+      { tip: 'Gamma',   label: 'Gamma',   glyph: 'Γ',  insert: '\\Gamma' },
+      { tip: 'Delta',   label: 'Delta',   glyph: 'Δ',  insert: '\\Delta' },
+      { tip: 'Theta',   label: 'Theta',   glyph: 'Θ',  insert: '\\Theta' },
+      { tip: 'Lambda',  label: 'Lambda',  glyph: 'Λ',  insert: '\\Lambda' },
+      { tip: 'Xi',      label: 'Xi',      glyph: 'Ξ',  insert: '\\Xi' },
+      { tip: 'Pi',      label: 'Pi',      glyph: 'Π',  insert: '\\Pi' },
+      { tip: 'Sigma',   label: 'Sigma',   glyph: 'Σ',  insert: '\\Sigma' },
+      { tip: 'Phi',     label: 'Phi',     glyph: 'Φ',  insert: '\\Phi' },
+      { tip: 'Psi',     label: 'Psi',     glyph: 'Ψ',  insert: '\\Psi' },
+      { tip: 'Omega',   label: 'Omega',   glyph: 'Ω',  insert: '\\Omega' },
+    ]
+  },
+  'Logica & Insiemi': {
+    icon: '∈',
+    items: [
+      { tip: 'Per ogni',       label: 'Per ogni',          glyph: '∀',  insert: '\\forall' },
+      { tip: 'Esiste',         label: 'Esiste',            glyph: '∃',  insert: '\\exists' },
+      { tip: 'Non esiste',     label: 'Non esiste',        glyph: '∄',  insert: '\\nexists' },
+      { tip: 'Appartiene',     label: 'Appartiene a',      glyph: '∈',  insert: '\\in' },
+      { tip: 'Non appart.',    label: 'Non appartiene',    glyph: '∉',  insert: '\\notin' },
+      { tip: 'Sottoinsieme',   label: 'Sottoinsieme',      glyph: '⊂',  insert: '\\subset' },
+      { tip: 'Sottoins. ⊆',    label: 'Sottoinsieme ⊆',    glyph: '⊆',  insert: '\\subseteq' },
+      { tip: 'Sovrainsieme',   label: 'Sovrainsieme',      glyph: '⊃',  insert: '\\supset' },
+      { tip: 'Unione',         label: 'Unione',            glyph: '∪',  insert: '\\cup' },
+      { tip: 'Intersezione',   label: 'Intersezione',      glyph: '∩',  insert: '\\cap' },
+      { tip: 'Insieme vuoto',  label: 'Insieme vuoto',     glyph: '∅',  insert: '\\emptyset' },
+      { tip: 'Naturali',       label: 'Numeri naturali',   glyph: 'ℕ',  insert: '\\mathbb{N}' },
+      { tip: 'Interi',         label: 'Numeri interi',     glyph: 'ℤ',  insert: '\\mathbb{Z}' },
+      { tip: 'Razionali',      label: 'Numeri razionali',  glyph: 'ℚ',  insert: '\\mathbb{Q}' },
+      { tip: 'Reali',          label: 'Numeri reali',      glyph: 'ℝ',  insert: '\\mathbb{R}' },
+      { tip: 'Complessi',      label: 'Numeri complessi',  glyph: 'ℂ',  insert: '\\mathbb{C}' },
+      { tip: 'AND',            label: 'AND logico',        glyph: '∧',  insert: '\\land' },
+      { tip: 'OR',             label: 'OR logico',         glyph: '∨',  insert: '\\lor' },
+      { tip: 'NOT',            label: 'NOT logico',        glyph: '¬',  insert: '\\neg' },
+      { tip: 'Implica',        label: 'Implica',           glyph: '⇒',  insert: '\\Rightarrow' },
+      { tip: 'Doppia implic.', label: 'Doppia implicaz.',  glyph: '⇔',  insert: '\\Leftrightarrow' },
+      { tip: 'Therefore',      label: 'Quindi (∴)',        glyph: '∴',  insert: '\\therefore' },
+      { tip: 'Because',        label: 'Poiché (∵)',        glyph: '∵',  insert: '\\because' },
+    ]
+  },
+  'Matrici': {
+    icon: '[a]',
+    items: [
+      { tip: 'Matrice 2×2 ( )',  label: 'Matrice 2×2 ( )',  glyph: '(2×2)', insert: '\\begin{pmatrix}#0 & \\placeholder{} \\\\ \\placeholder{} & \\placeholder{} \\end{pmatrix}' },
+      { tip: 'Matrice 3×3 ( )',  label: 'Matrice 3×3 ( )',  glyph: '(3×3)', insert: '\\begin{pmatrix}#0 & \\placeholder{} & \\placeholder{} \\\\ \\placeholder{} & \\placeholder{} & \\placeholder{} \\\\ \\placeholder{} & \\placeholder{} & \\placeholder{} \\end{pmatrix}' },
+      { tip: 'Matrice 2×2 [ ]',  label: 'Matrice 2×2 [ ]',  glyph: '[2×2]', insert: '\\begin{bmatrix}#0 & \\placeholder{} \\\\ \\placeholder{} & \\placeholder{} \\end{bmatrix}' },
+      { tip: 'Matrice 3×3 [ ]',  label: 'Matrice 3×3 [ ]',  glyph: '[3×3]', insert: '\\begin{bmatrix}#0 & \\placeholder{} & \\placeholder{} \\\\ \\placeholder{} & \\placeholder{} & \\placeholder{} \\\\ \\placeholder{} & \\placeholder{} & \\placeholder{} \\end{bmatrix}' },
+      { tip: 'Determinante 2×2', label: 'Determinante 2×2', glyph: '|2×2|', insert: '\\begin{vmatrix}#0 & \\placeholder{} \\\\ \\placeholder{} & \\placeholder{} \\end{vmatrix}' },
+      { tip: 'Determinante 3×3', label: 'Determinante 3×3', glyph: '|3×3|', insert: '\\begin{vmatrix}#0 & \\placeholder{} & \\placeholder{} \\\\ \\placeholder{} & \\placeholder{} & \\placeholder{} \\\\ \\placeholder{} & \\placeholder{} & \\placeholder{} \\end{vmatrix}' },
+      { tip: 'Sistema 2 eq.',    label: 'Sistema 2 equazioni', glyph: '{2eq', insert: '\\begin{cases}#0 \\\\ \\placeholder{} \\end{cases}' },
+      { tip: 'Sistema 3 eq.',    label: 'Sistema 3 equazioni', glyph: '{3eq', insert: '\\begin{cases}#0 \\\\ \\placeholder{} \\\\ \\placeholder{} \\end{cases}' },
+      { tip: 'Vettore colonna 3',label: 'Vettore colonna',  glyph: '(v↓)',  insert: '\\begin{pmatrix}#0 \\\\ \\placeholder{} \\\\ \\placeholder{} \\end{pmatrix}' },
+      { tip: 'Vettore riga 3',   label: 'Vettore riga',     glyph: '(v→)',  insert: '\\begin{pmatrix}#0 & \\placeholder{} & \\placeholder{} \\end{pmatrix}' },
+      { tip: 'Vettore (freccia)',label: 'Vettore con freccia', glyph: 'v⃗',  insert: '\\vec{#0}' },
+      { tip: 'Overrightarrow',   label: 'Vettore AB (overright.)', glyph: 'AB⃗', insert: '\\overrightarrow{#0}' },
+      { tip: 'Trasposta',        label: 'Trasposta',        glyph: 'Aᵀ',    insert: '#@^{T}' },
+      { tip: 'Inversa',          label: 'Inversa',          glyph: 'A⁻¹',   insert: '#@^{-1}' },
+      { tip: 'Punti orizz.',     label: 'Puntini orizzont.', glyph: '⋯',   insert: '\\cdots' },
+      { tip: 'Punti vert.',      label: 'Puntini verticali', glyph: '⋮',   insert: '\\vdots' },
+      { tip: 'Punti diag.',      label: 'Puntini diagonali', glyph: '⋱',   insert: '\\ddots' },
+    ]
+  },
+  'Funzioni': {
+    icon: 'ƒ',
+    items: [
+      { tip: 'seno',          label: 'Seno',         glyph: 'sin',    insert: '\\sin' },
+      { tip: 'coseno',        label: 'Coseno',       glyph: 'cos',    insert: '\\cos' },
+      { tip: 'tangente',      label: 'Tangente',     glyph: 'tan',    insert: '\\tan' },
+      { tip: 'cotangente',    label: 'Cotangente',   glyph: 'cot',    insert: '\\cot' },
+      { tip: 'arcoseno',      label: 'Arcoseno',     glyph: 'arcsin', insert: '\\arcsin' },
+      { tip: 'arcocoseno',    label: 'Arcocoseno',   glyph: 'arccos', insert: '\\arccos' },
+      { tip: 'arcotangente',  label: 'Arcotangente', glyph: 'arctan', insert: '\\arctan' },
+      { tip: 'seno iperb.',   label: 'Seno iperbol.',   glyph: 'sinh', insert: '\\sinh' },
+      { tip: 'coseno iperb.', label: 'Coseno iperbol.', glyph: 'cosh', insert: '\\cosh' },
+      { tip: 'Log naturale',  label: 'Logaritmo nat.', glyph: 'ln',   insert: '\\ln' },
+      { tip: 'Logaritmo',     label: 'Logaritmo',     glyph: 'log',   insert: '\\log' },
+      { tip: 'Log in base b', label: 'Log in base b', glyph: 'logᵦ',  insert: '\\log_{#0}' },
+      { tip: 'Esponenziale',  label: 'Esponenziale',  glyph: 'eˣ',    insert: 'e^{#0}' },
+      { tip: 'Massimo',       label: 'Massimo',       glyph: 'max',   insert: '\\max' },
+      { tip: 'Minimo',        label: 'Minimo',        glyph: 'min',   insert: '\\min' },
+      { tip: 'Estremo sup.',  label: 'Estremo superiore', glyph: 'sup', insert: '\\sup' },
+      { tip: 'Estremo inf.',  label: 'Estremo inferiore', glyph: 'inf', insert: '\\inf' },
+      { tip: 'Argomento',     label: 'Argomento',     glyph: 'arg',   insert: '\\arg' },
+      { tip: 'M.C.D.',        label: 'M.C.D.',        glyph: 'gcd',   insert: '\\gcd' },
+    ]
+  },
+  'Frecce & Accenti': {
+    icon: '→',
+    items: [
+      { tip: 'Freccia destra',    label: 'Freccia destra',     glyph: '→', insert: '\\rightarrow' },
+      { tip: 'Freccia sinistra',  label: 'Freccia sinistra',   glyph: '←', insert: '\\leftarrow' },
+      { tip: 'Freccia su',        label: 'Freccia su',         glyph: '↑', insert: '\\uparrow' },
+      { tip: 'Freccia giù',       label: 'Freccia giù',        glyph: '↓', insert: '\\downarrow' },
+      { tip: 'Doppia destra',     label: 'Doppia destra',      glyph: '⇒', insert: '\\Rightarrow' },
+      { tip: 'Doppia sinistra',   label: 'Doppia sinistra',    glyph: '⇐', insert: '\\Leftarrow' },
+      { tip: 'Mappa in',          label: 'Mappa in',           glyph: '↦', insert: '\\mapsto' },
+      { tip: 'Lunga destra',      label: 'Lunga destra',       glyph: '⟶', insert: '\\longrightarrow' },
+      { tip: 'Cappello',          label: 'Cappello (hat)',     glyph: 'x̂', insert: '\\hat{#0}' },
+      { tip: 'Tilde',             label: 'Tilde',              glyph: 'x̃', insert: '\\tilde{#0}' },
+      { tip: 'Bar',               label: 'Barra (bar)',        glyph: 'x̄', insert: '\\bar{#0}' },
+      { tip: 'Overline',          label: 'Sopralinea',         glyph: 'x̅', insert: '\\overline{#0}' },
+      { tip: 'Underline',         label: 'Sottolinea',         glyph: 'x̲', insert: '\\underline{#0}' },
+      { tip: 'Punto sopra',       label: 'Punto sopra',        glyph: 'ẋ', insert: '\\dot{#0}' },
+      { tip: 'Due punti sopra',   label: 'Due punti sopra',    glyph: 'ẍ', insert: '\\ddot{#0}' },
+      { tip: 'Vettore',           label: 'Vettore',            glyph: 'v⃗', insert: '\\vec{#0}' },
+      { tip: 'Overrightarrow',    label: 'Sopralinea + freccia', glyph: 'AB⃗', insert: '\\overrightarrow{#0}' },
+    ]
+  }
+};
+
+/* ===== INIT MATHLIVE ===== */
+const mf = document.getElementById('mf');
+const latexOut  = document.getElementById('latex-out');
+const preview   = document.getElementById('preview');
+const charCount = document.getElementById('char-count');
+
+mf.smartFence = true;
+mf.smartMode = false;
+mf.mathVirtualKeyboardPolicy = 'manual';
+mf.mathModeSpace = '\\,';
+
+mf.addEventListener('input', () => updateOutput());
+
+function getCleanLatex() {
+  try {
+    return mf.getValue('latex-without-placeholders') || '';
+  } catch (err) {
+    return mf.value || '';
+  }
+}
+
+function updateOutput() {
+  const latex = getCleanLatex();
+  latexOut.value = latex;
+  charCount.textContent = latex.length;
+
+  if (latex.trim() === '') {
+    preview.innerHTML = '<span class="placeholder">— nessuna formula —</span>';
+  } else {
+    preview.innerHTML = '$$' + latex + '$$';
+    if (window.MathJax && window.MathJax.typesetPromise) {
+      MathJax.typesetPromise([preview]).catch(() => {});
+    }
+  }
+}
+
+/* ===== COSTRUZIONE SIDEBAR (accordion) ===== */
+const categoriesEl = document.getElementById('categories');
+
+function renderSidebar(filterText = '') {
+  categoriesEl.innerHTML = '';
+  const filterLower = filterText.trim().toLowerCase();
+
+  Object.entries(PALETTES).forEach(([catName, catData], idx) => {
+    // Filtra gli items
+    const filtered = filterLower
+      ? catData.items.filter(it =>
+          it.label.toLowerCase().includes(filterLower) ||
+          it.tip.toLowerCase().includes(filterLower) ||
+          it.glyph.toLowerCase().includes(filterLower) ||
+          it.insert.toLowerCase().includes(filterLower))
+      : catData.items;
+
+    if (filterLower && filtered.length === 0) return;
+
+    const cat = document.createElement('div');
+    cat.className = 'category';
+    // Se c'è una ricerca attiva, espandi tutte le categorie con risultati
+    if (filterLower || idx === 0) cat.classList.add('active');
+
+    const header = document.createElement('div');
+    header.className = 'category-header';
+    header.innerHTML = `
+      <span class="category-icon">${catData.icon}</span>
+      <span class="category-label">${catName}</span>
+      <svg class="category-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="9 18 15 12 9 6"/>
+      </svg>
+    `;
+    header.addEventListener('click', () => {
+      // accordion: chiudi le altre, apri questa
+      document.querySelectorAll('.category').forEach(c => {
+        if (c !== cat) c.classList.remove('active');
+      });
+      cat.classList.toggle('active');
+    });
+    cat.appendChild(header);
+
+    const items = document.createElement('div');
+    items.className = 'category-items';
+    filtered.forEach(item => {
+      const b = document.createElement('button');
+      b.className = 'symbol-btn';
+      b.title = item.tip;
+      b.innerHTML = `<span class="glyph">${item.glyph}</span><span class="label">${item.label}</span>`;
+      b.addEventListener('mousedown', e => e.preventDefault());
+      b.addEventListener('click', () => {
+        insertLatex(item.insert);
+        mf.focus();
+      });
+      items.appendChild(b);
+    });
+    cat.appendChild(items);
+
+    categoriesEl.appendChild(cat);
+  });
+}
+
+renderSidebar();
+
+/* ===== RICERCA ===== */
+const searchEl = document.getElementById('search');
+let searchDebounce;
+searchEl.addEventListener('input', (e) => {
+  clearTimeout(searchDebounce);
+  searchDebounce = setTimeout(() => renderSidebar(e.target.value), 80);
+});
+searchEl.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    searchEl.value = '';
+    renderSidebar();
+    searchEl.blur();
+  }
+});
+
+/* ===== SIDEBAR TOGGLE ===== */
+const appEl = document.getElementById('app');
+const sidebarToggle = document.getElementById('sidebar-toggle');
+sidebarToggle.addEventListener('click', () => {
+  appEl.classList.toggle('sidebar-collapsed');
+});
+
+/* ===== INSERIMENTO LATEX (con fallback robusto) ===== */
+function templateToPlainLatex(tex) {
+  return String(tex)
+    .replace(/#@/g, '')
+    .replace(/#0|#\?/g, '\\placeholder{}');
+}
+
+function insertLatex(tex) {
+  if (!tex) return false;
+  const before = (() => {
+    try { return mf.getValue('latex'); } catch (e) { return mf.value || ''; }
+  })();
+
+  const options = {
+    focus: true,
+    feedback: false,
+    insertionMode: 'replaceSelection',
+    selectionMode: 'placeholder',
+    format: 'latex'
+  };
+
+  let ok = false;
+  try {
+    mf.focus();
+    if (typeof mf.insert === 'function') {
+      ok = mf.insert(tex, options);
+    } else {
+      ok = mf.executeCommand(['insert', tex, options]);
+    }
+  } catch (err) {
+    console.warn('Inserimento MathLive non riuscito; fallback.', err);
+    ok = false;
+  }
+
+  const after = (() => {
+    try { return mf.getValue('latex'); } catch (e) { return mf.value || ''; }
+  })();
+
+  if (!ok || after === before) {
+    const plain = templateToPlainLatex(tex);
+    try {
+      if (typeof mf.setValue === 'function') {
+        mf.setValue((before || '') + plain, { silenceNotifications: true });
+      } else {
+        mf.value = (before || '') + plain;
+      }
+      ok = true;
+    } catch (err) {
+      console.error('Fallback setValue fallito:', plain, err);
+      ok = false;
+    }
+  }
+
+  updateOutput();
+  mf.dispatchEvent(new Event('input', { bubbles: true }));
+  return ok;
+}
+
+/* ===== TOAST + COPIA ===== */
+const toast = document.getElementById('toast');
+function showToast(msg, kind = 'success') {
+  toast.textContent = msg;
+  toast.className = 'toast show ' + (kind === 'error' ? 'error' : kind === 'success' ? 'success' : '');
+  setTimeout(() => toast.classList.remove('show'), 1800);
+}
+
+async function copyText(text, label) {
+  try {
+    await navigator.clipboard.writeText(text);
+    showToast(label || 'Copiato negli appunti');
+  } catch (e) {
+    const tmp = document.createElement('textarea');
+    tmp.value = text;
+    document.body.appendChild(tmp);
+    tmp.select();
+    document.execCommand('copy');
+    document.body.removeChild(tmp);
+    showToast(label || 'Copiato negli appunti');
+  }
+}
+
+document.getElementById('btn-copy').addEventListener('click', () =>
+  copyText(latexOut.value, 'LaTeX copiato'));
+document.getElementById('btn-copy-inline').addEventListener('click', () =>
+  copyText('$' + latexOut.value + '$', 'Copiato come $…$'));
+document.getElementById('btn-copy-display').addEventListener('click', () =>
+  copyText('$$' + latexOut.value + '$$', 'Copiato come $$…$$'));
+document.getElementById('btn-clear').addEventListener('click', () => {
+  mf.value = '';
+  updateOutput();
+  mf.focus();
+});
+
+/* ===== MODALI ===== */
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+document.querySelectorAll('[data-close-modal]').forEach(el => {
+  el.addEventListener('click', () => closeModal(el.dataset.closeModal));
+});
+document.querySelectorAll('.modal-overlay').forEach(ov => {
+  ov.addEventListener('click', (e) => {
+    if (e.target === ov) ov.classList.remove('show');
+  });
+});
+
+/* === IMPORT === */
+document.getElementById('btn-import').addEventListener('click', () => {
+  document.getElementById('import-area').value = '';
+  openModal('modal-import');
+  setTimeout(() => document.getElementById('import-area').focus(), 50);
+});
+document.getElementById('btn-import-confirm').addEventListener('click', () => {
+  let tex = document.getElementById('import-area').value;
+  if (!tex || !tex.trim()) { closeModal('modal-import'); return; }
+  tex = tex.trim()
+    .replace(/^\$\$([\s\S]*)\$\$$/, '$1')
+    .replace(/^\$([\s\S]*)\$$/,    '$1')
+    .replace(/^\\\[([\s\S]*)\\\]$/,'$1')
+    .replace(/^\\\(([\s\S]*)\\\)$/,'$1')
+    .trim();
+  try {
+    mf.value = tex;
+    updateOutput();
+    showToast('Espressione importata');
+    mf.focus();
+    closeModal('modal-import');
+  } catch (err) {
+    showToast('Errore di parsing — verifica la sintassi', 'error');
+  }
+});
+document.getElementById('import-area').addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    e.preventDefault();
+    document.getElementById('btn-import-confirm').click();
+  }
+});
+
+/* === DIALOG MATRICE === */
+document.getElementById('btn-matrix').addEventListener('click', () => openModal('modal-matrix'));
+document.getElementById('btn-matrix-confirm').addEventListener('click', () => {
+  const rows = Math.max(1, Math.min(10, parseInt(document.getElementById('matrix-rows').value, 10) || 2));
+  const cols = Math.max(1, Math.min(10, parseInt(document.getElementById('matrix-cols').value, 10) || 2));
+  const type = document.getElementById('matrix-type').value;
+  const fill = document.getElementById('matrix-fill').checked;
+
+  let texRows = [];
+  for (let r = 0; r < rows; r++) {
+    const cells = [];
+    for (let c = 0; c < cols; c++) {
+      if (fill) cells.push(`a_{${r+1}${c+1}}`);
+      else cells.push('\\placeholder{}');
+    }
+    texRows.push(cells.join(' & '));
+  }
+  const inner = texRows.join(' \\\\ ');
+  const block = `\\begin{${type}}${inner}\\end{${type}}`;
+  const ok = insertLatex(block);
+  closeModal('modal-matrix');
+  mf.focus();
+  showToast(ok ? `Matrice ${type} ${rows}×${cols} inserita` : 'Errore inserimento matrice', ok ? 'success' : 'error');
+});
+
+/* === SCORCIATOIE === */
+document.addEventListener('keydown', (e) => {
+  // Ctrl+B = toggle sidebar
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
+    e.preventDefault();
+    appEl.classList.toggle('sidebar-collapsed');
+  }
+  // Ctrl+K = focus search
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+    e.preventDefault();
+    searchEl.focus();
+    searchEl.select();
+  }
+  // Ctrl+L = import LaTeX
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'l' && !e.shiftKey) {
+    e.preventDefault();
+    document.getElementById('btn-import').click();
+  }
+  // Ctrl+M = matrice
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'm') {
+    e.preventDefault();
+    document.getElementById('btn-matrix').click();
+  }
+  // Esc = chiude modali
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.show').forEach(m => m.classList.remove('show'));
+  }
+});
+
+// Focus iniziale
+setTimeout(() => mf.focus(), 200);
+</script>
+
+</body>
+</html>
