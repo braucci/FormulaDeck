@@ -511,7 +511,7 @@
     --placeholder-color: #A1A1AA;
     --placeholder-opacity: 1;
   }
-  math-field::part(virtual-keyboard-toggle),
+  /* Modifica CSS: ora nascondiamo solo il menu-toggle, permettendo al virtual-keyboard-toggle di apparire */
   math-field::part(menu-toggle) {
     display: none;
   }
@@ -1557,7 +1557,8 @@ function initMathfield() {
   // Configurazione: ora siamo sicuri che mf è una MathfieldElement vera.
   mf.smartFence = true;
   mf.smartMode = false;
-  mf.mathVirtualKeyboardPolicy = 'manual';
+  // Modifica JS: impostata la policy su auto per mostrare la tastiera virtuale su mobile
+  mf.mathVirtualKeyboardPolicy = 'auto';
   mf.mathModeSpace = '\\,';
 
   // Listener principale: ogni modifica aggiorna sorgente LaTeX + anteprima.
