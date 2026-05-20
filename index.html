@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-<script src="https://cdn.jsdelivr.net/npm/mathlive@0.101.0/mathlive.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathlive@0.101.0/mathlive.min.js"></script>
 <script>
   window.MathJax = {
     tex: {
@@ -777,44 +777,21 @@
     border: 2px solid transparent;
   }
 
-  /* ================= MOBILE HAMBURGER (nascosto su desktop) ================= */
+  /* ===== ELEMENTI MOBILE (default: nascosti) ===== */
   .mobile-hamburger,
-  .mobile-actions-toggle {
-    display: none;
-  }
-
-  /* Backdrop drawer (nascosto su desktop) */
-  .drawer-backdrop {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(10,10,10,0.5);
-    z-index: 99;
-    opacity: 0;
-    transition: opacity var(--t-base);
-    backdrop-filter: blur(2px);
-  }
-  .drawer-backdrop.show {
-    display: block;
-    opacity: 1;
-  }
-
-  /* Bottom sheet mobile per le azioni (nascosto su desktop) */
+  .mobile-actions-toggle,
+  .drawer-backdrop,
   .mobile-actions-sheet {
     display: none;
   }
 
-  /* ================= RESPONSIVE MOBILE ================= */
+  /* ===== RESPONSIVE MOBILE ===== */
   @media (max-width: 768px) {
-    /* App diventa single-column: la sidebar si trasforma in drawer assoluto */
     .app {
       display: block;
       height: auto;
       min-height: 100vh;
     }
-    .app.sidebar-collapsed { display: block; }
-
-    /* Sidebar = drawer off-canvas */
     .sidebar {
       position: fixed;
       top: 0;
@@ -826,69 +803,59 @@
       transform: translateX(-100%);
       transition: transform var(--t-base);
       box-shadow: var(--shadow-lg);
-      border-right: 1px solid var(--border);
     }
-    .app.sidebar-open .sidebar {
-      transform: translateX(0);
-    }
-    /* Su mobile la sidebar è SEMPRE in stato "aperta logicamente" quando visibile:
-       ignoriamo la classe collapsed che è solo per desktop */
-    .app.sidebar-collapsed .sidebar {
-      transform: translateX(-100%);
-    }
-    .app.sidebar-collapsed.sidebar-open .sidebar {
-      transform: translateX(0);
-    }
-    /* Forziamo lo stato "espanso" dei contenuti della sidebar anche quando
-       l'app ha la classe sidebar-collapsed da desktop */
-    .app .sidebar-brand .name,
-    .app .sidebar-search,
-    .app .category-label,
-    .app .category-items,
-    .app .sidebar-footer-text {
+    .app.sidebar-open .sidebar { transform: translateX(0); }
+    .sidebar-toggle { display: none; }
+
+    .app.sidebar-collapsed .sidebar-brand .name,
+    .app.sidebar-collapsed .sidebar-search,
+    .app.sidebar-collapsed .category-label,
+    .app.sidebar-collapsed .sidebar-footer-text {
       display: block;
     }
-    .app .category-header {
+    .app.sidebar-collapsed .category-chevron { display: block; }
+    .app.sidebar-collapsed .category-header {
       justify-content: flex-start;
       padding: 7px 10px;
     }
-    .app .category-chevron { display: block; }
-    .app .sidebar-search { padding: 0 16px 12px 16px; display: block; }
-    /* Nascondiamo il toggle interno della sidebar su mobile: si usa il backdrop */
-    .sidebar-toggle { display: none; }
+    .app.sidebar-collapsed .category-icon { font-size: 13px; }
 
-    /* Hamburger e azioni mobile visibili */
-    .mobile-hamburger {
-      display: grid;
-      place-items: center;
-      width: 38px; height: 38px;
-      background: transparent;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      color: var(--text);
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(10,10,10,0.5);
+      z-index: 99;
+      opacity: 0;
+      transition: opacity var(--t-base);
+      backdrop-filter: blur(2px);
+      pointer-events: none;
     }
-    .mobile-hamburger:active { background: var(--surface-2); }
-    .mobile-hamburger svg { width: 18px; height: 18px; }
+    .drawer-backdrop.show {
+      display: block;
+      opacity: 1;
+      pointer-events: auto;
+    }
 
+    .mobile-hamburger,
     .mobile-actions-toggle {
       display: grid;
       place-items: center;
-      width: 38px; height: 38px;
+      width: 38px;
+      height: 38px;
       background: transparent;
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       cursor: pointer;
       color: var(--text);
+      flex-shrink: 0;
     }
+    .mobile-hamburger:active,
     .mobile-actions-toggle:active { background: var(--surface-2); }
+    .mobile-hamburger svg,
     .mobile-actions-toggle svg { width: 18px; height: 18px; }
 
-    /* Nascondiamo i pulsanti desktop di azioni dalla topbar:
-       le azioni andranno nel bottom sheet */
     .topbar-actions .btn { display: none; }
 
-    /* Topbar mobile compatta */
     .topbar {
       height: 54px;
       padding: 0 12px;
@@ -904,25 +871,18 @@
       text-overflow: ellipsis;
     }
     .topbar-title .badge { display: none; }
-    .topbar-title {
-      flex: 1;
-      min-width: 0;
-      gap: 10px;
-    }
+    .topbar-title { flex: 1; min-width: 0; gap: 10px; }
 
-    /* Contenuto principale: stack verticale */
     .content {
       padding: 14px;
       gap: 14px;
       max-width: 100%;
     }
-    /* La griglia editor+latex diventa una colonna sola */
     .content > div[style*="grid-template-columns"] {
       grid-template-columns: 1fr !important;
       gap: 14px !important;
     }
 
-    /* Card più compatte */
     .card { border-radius: 10px; }
     .card-header {
       padding: 10px 14px;
@@ -936,15 +896,11 @@
       font-size: 11.5px !important;
     }
 
-    /* Editor MathLive: dimensione ridotta ma ancora confortevole al tocco */
     math-field {
       font-size: 20px;
       padding: 16px 14px;
       min-height: 110px;
     }
-    /* Editor MathLive: abilitiamo la tastiera virtuale matematica nativa
-       (impostazione fatta via JS più sotto) */
-
     #preview {
       font-size: 20px;
       padding: 24px 14px;
@@ -956,24 +912,20 @@
       padding: 12px 14px;
     }
 
-    /* Statusbar: nascondiamo la firma per fare spazio, e wrap su più righe */
     .statusbar {
       padding: 8px 14px;
       flex-wrap: wrap;
       gap: 10px;
       font-size: 11px;
     }
-    .statusbar .status-item:nth-child(2),  /* Motore */
-    .statusbar .status-item:nth-child(3),  /* Stile */
-    .statusbar .status-item:last-child {   /* Firma */
-      display: none;
-    }
+    .statusbar .status-item:nth-child(2),
+    .statusbar .status-item:nth-child(3),
+    .statusbar .status-item:last-child { display: none; }
 
-    /* Targets touch più ampi nelle palette */
     .symbol-btn {
       padding: 10px 12px;
       gap: 14px;
-      min-height: 44px;  /* HIG iOS: 44pt minimo */
+      min-height: 44px;
     }
     .symbol-btn .glyph { font-size: 18px; min-width: 32px; }
     .symbol-btn .label { font-size: 13.5px; }
@@ -987,13 +939,9 @@
 
     .sidebar-search input {
       padding: 10px 12px 10px 36px;
-      font-size: 14px;  /* evita lo zoom automatico iOS su focus < 16px */
-    }
-    .sidebar-search::before {
-      top: calc(50% - 6px);
+      font-size: 16px;
     }
 
-    /* BOTTOM SHEET delle azioni */
     .mobile-actions-sheet {
       display: block;
       position: fixed;
@@ -1011,7 +959,8 @@
     }
     .mobile-actions-sheet.show { transform: translateY(0); }
     .mobile-actions-sheet .handle {
-      width: 36px; height: 4px;
+      width: 36px;
+      height: 4px;
       background: var(--border-strong);
       border-radius: 2px;
       margin: 0 auto 12px;
@@ -1047,7 +996,12 @@
       transition: background var(--t-fast);
     }
     .mobile-actions-sheet .sheet-btn:active { background: var(--surface-2); }
-    .mobile-actions-sheet .sheet-btn svg { width: 18px; height: 18px; color: var(--text-3); flex-shrink: 0; }
+    .mobile-actions-sheet .sheet-btn svg {
+      width: 18px;
+      height: 18px;
+      color: var(--text-3);
+      flex-shrink: 0;
+    }
     .mobile-actions-sheet .sheet-btn .label-area {
       display: flex;
       flex-direction: column;
@@ -1061,7 +1015,6 @@
     .mobile-actions-sheet .sheet-btn.danger { color: var(--error); }
     .mobile-actions-sheet .sheet-btn.danger svg { color: var(--error); }
 
-    /* Modali a tutta larghezza con bordi più piccoli */
     .modal {
       min-width: 0;
       width: calc(100% - 24px);
@@ -1072,7 +1025,6 @@
     .modal-body { padding: 16px 18px; }
     .modal-footer { padding: 12px 18px; flex-wrap: wrap; }
 
-    /* Toast appena sopra il bottom sheet eventuale */
     .toast {
       bottom: 16px;
       font-size: 12.5px;
@@ -1081,7 +1033,6 @@
     }
   }
 
-  /* Schermi piccolissimi (< 380px): ottimizzazioni aggiuntive */
   @media (max-width: 380px) {
     .topbar { padding: 0 10px; }
     .topbar-title h1 { font-size: 14px; }
@@ -1255,10 +1206,10 @@
   </main>
 </div>
 
-<!-- ============== BACKDROP DRAWER MOBILE ============== -->
+<!-- DRAWER BACKDROP -->
 <div class="drawer-backdrop" id="drawer-backdrop"></div>
 
-<!-- ============== BOTTOM SHEET AZIONI MOBILE ============== -->
+<!-- BOTTOM SHEET AZIONI -->
 <div class="mobile-actions-sheet" id="mobile-actions-sheet">
   <div class="handle"></div>
   <div class="sheet-title">Azioni</div>
@@ -1284,7 +1235,7 @@
       </svg>
       <div class="label-area">
         <span>Inserisci matrice</span>
-        <span class="sub">Costruttore guidato di matrici e sistemi</span>
+        <span class="sub">Costruttore di matrici e sistemi</span>
       </div>
     </button>
     <button class="sheet-btn" id="sheet-btn-copy">
@@ -1514,16 +1465,16 @@ const PALETTES = {
   'Matrici': {
     icon: '[a]',
     items: [
-      { tip: 'Matrice 2×2 ( )',  label: 'Matrice 2×2 ( )',  glyph: '(2×2)', insert: '\\begin{pmatrix}#0 & \\placeholder{} \\\\ \\placeholder{} & \\placeholder{} \\end{pmatrix}' },
-      { tip: 'Matrice 3×3 ( )',  label: 'Matrice 3×3 ( )',  glyph: '(3×3)', insert: '\\begin{pmatrix}#0 & \\placeholder{} & \\placeholder{} \\\\ \\placeholder{} & \\placeholder{} & \\placeholder{} \\\\ \\placeholder{} & \\placeholder{} & \\placeholder{} \\end{pmatrix}' },
-      { tip: 'Matrice 2×2 [ ]',  label: 'Matrice 2×2 [ ]',  glyph: '[2×2]', insert: '\\begin{bmatrix}#0 & \\placeholder{} \\\\ \\placeholder{} & \\placeholder{} \\end{bmatrix}' },
-      { tip: 'Matrice 3×3 [ ]',  label: 'Matrice 3×3 [ ]',  glyph: '[3×3]', insert: '\\begin{bmatrix}#0 & \\placeholder{} & \\placeholder{} \\\\ \\placeholder{} & \\placeholder{} & \\placeholder{} \\\\ \\placeholder{} & \\placeholder{} & \\placeholder{} \\end{bmatrix}' },
-      { tip: 'Determinante 2×2', label: 'Determinante 2×2', glyph: '|2×2|', insert: '\\begin{vmatrix}#0 & \\placeholder{} \\\\ \\placeholder{} & \\placeholder{} \\end{vmatrix}' },
-      { tip: 'Determinante 3×3', label: 'Determinante 3×3', glyph: '|3×3|', insert: '\\begin{vmatrix}#0 & \\placeholder{} & \\placeholder{} \\\\ \\placeholder{} & \\placeholder{} & \\placeholder{} \\\\ \\placeholder{} & \\placeholder{} & \\placeholder{} \\end{vmatrix}' },
-      { tip: 'Sistema 2 eq.',    label: 'Sistema 2 equazioni', glyph: '{2eq', insert: '\\begin{cases}#0 \\\\ \\placeholder{} \\end{cases}' },
-      { tip: 'Sistema 3 eq.',    label: 'Sistema 3 equazioni', glyph: '{3eq', insert: '\\begin{cases}#0 \\\\ \\placeholder{} \\\\ \\placeholder{} \\end{cases}' },
-      { tip: 'Vettore colonna 3',label: 'Vettore colonna',  glyph: '(v↓)',  insert: '\\begin{pmatrix}#0 \\\\ \\placeholder{} \\\\ \\placeholder{} \\end{pmatrix}' },
-      { tip: 'Vettore riga 3',   label: 'Vettore riga',     glyph: '(v→)',  insert: '\\begin{pmatrix}#0 & \\placeholder{} & \\placeholder{} \\end{pmatrix}' },
+      { tip: 'Matrice 2×2 ( )',  label: 'Matrice 2×2 ( )',  glyph: '(2×2)', insert: '\\begin{pmatrix}#0 & #? \\\\ #? & #? \\end{pmatrix}' },
+      { tip: 'Matrice 3×3 ( )',  label: 'Matrice 3×3 ( )',  glyph: '(3×3)', insert: '\\begin{pmatrix}#0 & #? & #? \\\\ #? & #? & #? \\\\ #? & #? & #? \\end{pmatrix}' },
+      { tip: 'Matrice 2×2 [ ]',  label: 'Matrice 2×2 [ ]',  glyph: '[2×2]', insert: '\\begin{bmatrix}#0 & #? \\\\ #? & #? \\end{bmatrix}' },
+      { tip: 'Matrice 3×3 [ ]',  label: 'Matrice 3×3 [ ]',  glyph: '[3×3]', insert: '\\begin{bmatrix}#0 & #? & #? \\\\ #? & #? & #? \\\\ #? & #? & #? \\end{bmatrix}' },
+      { tip: 'Determinante 2×2', label: 'Determinante 2×2', glyph: '|2×2|', insert: '\\begin{vmatrix}#0 & #? \\\\ #? & #? \\end{vmatrix}' },
+      { tip: 'Determinante 3×3', label: 'Determinante 3×3', glyph: '|3×3|', insert: '\\begin{vmatrix}#0 & #? & #? \\\\ #? & #? & #? \\\\ #? & #? & #? \\end{vmatrix}' },
+      { tip: 'Sistema 2 eq.',    label: 'Sistema 2 equazioni', glyph: '{2eq', insert: '\\begin{cases}#0 \\\\ #? \\end{cases}' },
+      { tip: 'Sistema 3 eq.',    label: 'Sistema 3 equazioni', glyph: '{3eq', insert: '\\begin{cases}#0 \\\\ #? \\\\ #? \\end{cases}' },
+      { tip: 'Vettore colonna 3',label: 'Vettore colonna',  glyph: '(v↓)',  insert: '\\begin{pmatrix}#0 \\\\ #? \\\\ #? \\end{pmatrix}' },
+      { tip: 'Vettore riga 3',   label: 'Vettore riga',     glyph: '(v→)',  insert: '\\begin{pmatrix}#0 & #? & #? \\end{pmatrix}' },
       { tip: 'Vettore (freccia)',label: 'Vettore con freccia', glyph: 'v⃗',  insert: '\\vec{#0}' },
       { tip: 'Overrightarrow',   label: 'Vettore AB (overright.)', glyph: 'AB⃗', insert: '\\overrightarrow{#0}' },
       { tip: 'Trasposta',        label: 'Trasposta',        glyph: 'Aᵀ',    insert: '#@^{T}' },
@@ -1581,25 +1532,96 @@ const PALETTES = {
   }
 };
 
-/* ===== INIT MATHLIVE ===== */
+/* ===== INIT MATHLIVE =====
+   Nota tecnica: il tag <math-field> è un custom element registrato dallo
+   script MathLive caricato in <head> con attributo defer. Per evitare la
+   classica race condition in cui le proprietà (smartFence, smartMode, ...)
+   vengono settate PRIMA che il browser abbia "upgradato" l'elemento
+   alla classe MathfieldElement, attendiamo customElements.whenDefined.
+   Questa è la causa più frequente del "math-field vuoto e non editabile".
+*/
 const mf = document.getElementById('mf');
 const latexOut  = document.getElementById('latex-out');
 const preview   = document.getElementById('preview');
 const charCount = document.getElementById('char-count');
 
-mf.smartFence = true;
-mf.smartMode = false;
-mf.mathVirtualKeyboardPolicy = 'manual';
-mf.mathModeSpace = '\\,';
+/* Lettura del LaTeX robusta rispetto alla versione di MathLive.
+   - API moderna (>= 0.95):  mf.getValue({ format: 'latex-without-placeholders' })
+   - API legacy:             mf.getValue('latex-without-placeholders')
+   - Fallback estremo:       mf.value
+   Inoltre, se l'elemento non è ancora upgradato, getValue non esiste:
+   restituiamo stringa vuota senza esplodere. */
+function readLatexFromMathfield(format) {
+  if (!mf) return '';
+  if (typeof mf.getValue === 'function') {
+    try { return mf.getValue({ format }) || ''; } catch (_) {}
+    try { return mf.getValue(format) || ''; } catch (_) {}
+  }
+  return mf.value || '';
+}
 
-mf.addEventListener('input', () => updateOutput());
+function initMathfield() {
+  // Configurazione: ora siamo sicuri che mf è una MathfieldElement vera.
+  mf.smartFence = true;
+  mf.smartMode = false;
+  mf.mathVirtualKeyboardPolicy = 'manual';
+  mf.mathModeSpace = '\\,';
+
+  // Listener principale: ogni modifica aggiorna sorgente LaTeX + anteprima.
+  mf.addEventListener('input', updateOutput);
+  // 'change' come rete di sicurezza per inserimenti programmatici che in
+  // alcune versioni non riemettono 'input'.
+  mf.addEventListener('change', updateOutput);
+
+  // Primo render: imposta placeholder/anteprima coerente con stato vuoto.
+  updateOutput();
+
+  // Focus iniziale leggero (non blocca la pagina se l'utente sta scrollando).
+  setTimeout(() => { try { mf.focus(); } catch (_) {} }, 50);
+}
+
+if (window.customElements && customElements.whenDefined) {
+  customElements.whenDefined('math-field').then(initMathfield).catch(err => {
+    console.error('MathLive non si è registrato:', err);
+    // Fallback: proviamo comunque, magari l'elemento è già pronto.
+    initMathfield();
+  });
+} else {
+  // Browser molto vecchio: tentiamo direttamente.
+  initMathfield();
+}
 
 function getCleanLatex() {
-  try {
-    return mf.getValue('latex-without-placeholders') || '';
-  } catch (err) {
-    return mf.value || '';
-  }
+  // Usa la funzione robusta: niente più crash se l'elemento non è pronto.
+  let latex = readLatexFromMathfield('latex-without-placeholders');
+  if (!latex) latex = readLatexFromMathfield('latex'); // fallback ulteriore
+
+  /* ====== PULIZIA TESTUALE EXTRA ======
+     Cintura di sicurezza per casi-limite. In condizioni normali MathLive
+     restituisce già LaTeX pulito tramite 'latex-without-placeholders'.
+     Ma se per qualche ragione il fallback di insertLatex ha iniettato testo
+     letterale tipo \placeholder{} o {}, lo ripuliamo qui per produrre
+     comunque LaTeX compilabile da incollare in pdflatex / MathJax.
+  */
+
+  // 1) Rimuove \placeholder{contenuto} mantenendo eventuale contenuto interno.
+  //    Gestisce graffe annidate semplici (max 1 livello, sufficiente in pratica).
+  latex = latex.replace(/\\placeholder\{([^{}]*)\}/g, '$1');
+
+  // 2) Rimuove \placeholder{} completamente vuoti (residuo del passo 1 o
+  //    di un fallback originario): li sostituisce con stringa vuota perché
+  //    in MathJax {\,} produce uno spazio sottile orfano nei sub/sup.
+  latex = latex.replace(/\\placeholder\s*\{\s*\}/g, '');
+
+  // 3) Comprime sequenze di graffe vuote consecutive (\frac{}{} -> \frac{}{}
+  //    resta com'è, ma {}{}{} -> {}{} se mai dovesse capitare). Innocuo.
+  //    Non rimuoviamo {} singoli perché in LaTeX {} ha senso (gruppo vuoto,
+  //    es. utile dopo \int per scoping del limite).
+
+  // 4) Doppi spazi superflui (cosmetico, per leggibilità nel pannello LaTeX)
+  latex = latex.replace(/\s{2,}/g, ' ');
+
+  return latex.trim();
 }
 
 function updateOutput() {
@@ -1703,18 +1725,29 @@ sidebarToggle.addEventListener('click', () => {
   appEl.classList.toggle('sidebar-collapsed');
 });
 
-/* ===== INSERIMENTO LATEX (con fallback robusto) ===== */
+/* ===== INSERIMENTO LATEX =====
+   Nota tecnica importante:
+   MathLive.insert() non restituisce sempre true/false. In molte versioni
+   restituisce undefined anche quando l'inserimento è andato a buon fine.
+   Per questo NON usiamo il valore di ritorno per decidere se attivare il
+   fallback, ma confrontiamo il LaTeX prima e dopo l'operazione: se è
+   cambiato, l'inserimento è riuscito; altrimenti scatta il fallback.
+*/
+function readMathfieldLatex() {
+  try { return mf.getValue('latex') || ''; }
+  catch (e) { return mf.value || ''; }
+}
+
 function templateToPlainLatex(tex) {
   return String(tex)
     .replace(/#@/g, '')
-    .replace(/#0|#\?/g, '\\placeholder{}');
+    .replace(/#0|#\?/g, '{}');
 }
 
 function insertLatex(tex) {
   if (!tex) return false;
-  const before = (() => {
-    try { return mf.getValue('latex'); } catch (e) { return mf.value || ''; }
-  })();
+
+  const before = readMathfieldLatex();
 
   const options = {
     focus: true,
@@ -1724,41 +1757,45 @@ function insertLatex(tex) {
     format: 'latex'
   };
 
-  let ok = false;
+  let commandFailed = false;
+
   try {
     mf.focus();
     if (typeof mf.insert === 'function') {
-      ok = mf.insert(tex, options);
+      mf.insert(tex, options);
+    } else if (typeof mf.executeCommand === 'function') {
+      mf.executeCommand(['insert', tex, options]);
     } else {
-      ok = mf.executeCommand(['insert', tex, options]);
+      commandFailed = true;
     }
   } catch (err) {
-    console.warn('Inserimento MathLive non riuscito; fallback.', err);
-    ok = false;
+    console.warn('Inserimento MathLive non riuscito; provo il fallback.', err);
+    commandFailed = true;
   }
 
-  const after = (() => {
-    try { return mf.getValue('latex'); } catch (e) { return mf.value || ''; }
-  })();
+  let after = readMathfieldLatex();
 
-  if (!ok || after === before) {
+  // Fallback solo se il comando non ha modificato davvero il math-field.
+  if (commandFailed || after === before) {
     const plain = templateToPlainLatex(tex);
     try {
+      const merged = (before || '') + plain;
       if (typeof mf.setValue === 'function') {
-        mf.setValue((before || '') + plain, { silenceNotifications: true });
+        mf.setValue(merged, { silenceNotifications: true });
       } else {
-        mf.value = (before || '') + plain;
+        mf.value = merged;
       }
-      ok = true;
+      after = readMathfieldLatex();
     } catch (err) {
       console.error('Fallback setValue fallito:', plain, err);
-      ok = false;
+      showToast("Errore durante l'inserimento", "error");
+      return false;
     }
   }
 
   updateOutput();
-  mf.dispatchEvent(new Event('input', { bubbles: true }));
-  return ok;
+  mf.focus();
+  return after !== before;
 }
 
 /* ===== TOAST + COPIA ===== */
@@ -1854,7 +1891,7 @@ document.getElementById('btn-matrix-confirm').addEventListener('click', () => {
     const cells = [];
     for (let c = 0; c < cols; c++) {
       if (fill) cells.push(`a_{${r+1}${c+1}}`);
-      else cells.push('\\placeholder{}');
+      else cells.push((r === 0 && c === 0) ? '#0' : '#?');
     }
     texRows.push(cells.join(' & '));
   }
@@ -1895,111 +1932,99 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-// Focus iniziale (solo su desktop: su mobile evitiamo che si apra subito la tastiera)
-const isMobileDevice = window.matchMedia('(max-width: 768px)').matches;
-
-if (!isMobileDevice) {
-  setTimeout(() => mf.focus(), 200);
-} else {
-  // Su mobile abilitiamo la tastiera virtuale matematica di MathLive:
-  // è progettata per il touch e contiene tutti i simboli matematici essenziali
-  // in modalità "auto" appare quando l'utente tocca il campo
-  mf.mathVirtualKeyboardPolicy = 'auto';
-}
+// Focus iniziale ora gestito dentro initMathfield() — qui non serve più.
 
 /* =========================================================================
    MOBILE: drawer sidebar + bottom sheet azioni
+   Logica auto-contenuta in IIFE: si attiva solo quando i pulsanti mobile
+   sono visibili (sotto i 768px). Su desktop i pulsanti hanno display:none
+   e i listener restano dormienti senza alcun effetto.
    ========================================================================= */
-const drawerBackdrop = document.getElementById('drawer-backdrop');
-const mobileHamburger = document.getElementById('mobile-hamburger');
-const mobileActionsToggle = document.getElementById('mobile-actions-toggle');
-const mobileActionsSheet = document.getElementById('mobile-actions-sheet');
+(function setupMobile() {
+  const drawerBackdrop = document.getElementById('drawer-backdrop');
+  const mobileHamburger = document.getElementById('mobile-hamburger');
+  const mobileActionsToggle = document.getElementById('mobile-actions-toggle');
+  const mobileActionsSheet = document.getElementById('mobile-actions-sheet');
 
-function openDrawer() {
-  appEl.classList.add('sidebar-open');
-  drawerBackdrop.classList.add('show');
-  document.body.style.overflow = 'hidden';
-}
-function closeDrawer() {
-  appEl.classList.remove('sidebar-open');
-  drawerBackdrop.classList.remove('show');
-  document.body.style.overflow = '';
-}
+  if (!mobileHamburger || !drawerBackdrop || !mobileActionsSheet) return;
 
-if (mobileHamburger) {
-  mobileHamburger.addEventListener('click', () => {
+  function openDrawer() {
+    appEl.classList.add('sidebar-open');
+    drawerBackdrop.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeDrawer() {
+    appEl.classList.remove('sidebar-open');
+    drawerBackdrop.classList.remove('show');
+    document.body.style.overflow = '';
+  }
+  function openSheet()  { mobileActionsSheet.classList.add('show'); }
+  function closeSheet() { mobileActionsSheet.classList.remove('show'); }
+
+  mobileHamburger.addEventListener('click', (e) => {
+    e.stopPropagation();
     if (appEl.classList.contains('sidebar-open')) closeDrawer();
     else openDrawer();
   });
-}
-if (drawerBackdrop) {
+
   drawerBackdrop.addEventListener('click', closeDrawer);
-}
 
-// Quando l'utente sceglie un simbolo dalla sidebar su mobile, chiudiamo il drawer
-// per liberare la vista sull'editor — comportamento intuitivo come app native
-categoriesEl.addEventListener('click', (e) => {
-  if (window.matchMedia('(max-width: 768px)').matches) {
-    if (e.target.closest('.symbol-btn')) {
-      // piccolo delay per percepire il feedback del tap prima della chiusura
-      setTimeout(closeDrawer, 120);
+  if (categoriesEl) {
+    categoriesEl.addEventListener('click', (e) => {
+      if (window.matchMedia('(max-width: 768px)').matches) {
+        if (e.target.closest('.symbol-btn')) {
+          setTimeout(closeDrawer, 120);
+        }
+      }
+    });
+  }
+
+  if (mobileActionsToggle) {
+    mobileActionsToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (mobileActionsSheet.classList.contains('show')) closeSheet();
+      else openSheet();
+    });
+  }
+
+  document.addEventListener('click', (e) => {
+    if (!mobileActionsSheet.classList.contains('show')) return;
+    if (!mobileActionsSheet.contains(e.target) &&
+        (!mobileActionsToggle || !mobileActionsToggle.contains(e.target))) {
+      closeSheet();
     }
-  }
-});
+  });
 
-// Bottom sheet azioni
-function openSheet() {
-  mobileActionsSheet.classList.add('show');
-}
-function closeSheet() {
-  mobileActionsSheet.classList.remove('show');
-}
-if (mobileActionsToggle) {
-  mobileActionsToggle.addEventListener('click', openSheet);
-}
+  const map = {
+    'sheet-btn-import': 'btn-import',
+    'sheet-btn-matrix': 'btn-matrix',
+    'sheet-btn-copy':   'btn-copy',
+    'sheet-btn-clear':  'btn-clear'
+  };
+  Object.entries(map).forEach(([sheetId, btnId]) => {
+    const el = document.getElementById(sheetId);
+    if (el) el.addEventListener('click', () => {
+      closeSheet();
+      const target = document.getElementById(btnId);
+      if (target) target.click();
+    });
+  });
 
-// Chiudi il sheet toccando fuori
-document.addEventListener('click', (e) => {
-  if (!mobileActionsSheet.classList.contains('show')) return;
-  if (!mobileActionsSheet.contains(e.target) && !mobileActionsToggle.contains(e.target)) {
-    closeSheet();
-  }
-});
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeDrawer();
+      closeSheet();
+    }
+  });
 
-// Collegamento dei pulsanti del sheet alle azioni esistenti
-document.getElementById('sheet-btn-import').addEventListener('click', () => {
-  closeSheet();
-  document.getElementById('btn-import').click();
-});
-document.getElementById('sheet-btn-matrix').addEventListener('click', () => {
-  closeSheet();
-  document.getElementById('btn-matrix').click();
-});
-document.getElementById('sheet-btn-copy').addEventListener('click', () => {
-  closeSheet();
-  document.getElementById('btn-copy').click();
-});
-document.getElementById('sheet-btn-clear').addEventListener('click', () => {
-  closeSheet();
-  document.getElementById('btn-clear').click();
-});
-
-// Esc chiude anche drawer e sheet
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') {
-    closeDrawer();
-    closeSheet();
-  }
-});
-
-// Quando si passa da mobile a desktop (rotazione/resize), riportiamo tutto in ordine
-window.addEventListener('resize', () => {
-  if (!window.matchMedia('(max-width: 768px)').matches) {
-    closeDrawer();
-    closeSheet();
-    document.body.style.overflow = '';
-  }
-});
+  window.addEventListener('resize', () => {
+    if (!window.matchMedia('(max-width: 768px)').matches) {
+      closeDrawer();
+      closeSheet();
+      document.body.style.overflow = '';
+    }
+  });
+})();
 </script>
 
 </body>
