@@ -1,3 +1,10 @@
+Certamente. Ecco l'intero codice del file `index.html` corretto.
+
+Ho sostituito il link del pacchetto MathLive con il CDN di unpkg che punta in automatico all'ultima versione stabile e funzionante, ed ho anche modificato l'etichetta del footer (riga 595) in modo da non dover più aggiornare a mano il numero di versione in futuro.
+
+Puoi copiare questo codice e sovrascrivere interamente il tuo attuale file `index.html`:
+
+```html
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -9,7 +16,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-<script defer src="https://cdn.jsdelivr.net/npm/mathlive@0.101.0/mathlive.min.js"></script>
+<script defer src="https://unpkg.com/mathlive"></script>
+
 <script>
   window.MathJax = {
     tex: {
@@ -1047,7 +1055,6 @@
 
 <div class="app" id="app">
 
-  <!-- ============== SIDEBAR ============== -->
   <aside class="sidebar">
     <div class="sidebar-header">
       <div class="sidebar-brand">
@@ -1071,12 +1078,11 @@
     <div class="sidebar-footer">
       <div class="sidebar-footer-text">
         <span class="dot"></span>
-        <span>MathLive 0.101 — pronto</span>
+        <span>MathLive — pronto</span>
       </div>
     </div>
   </aside>
 
-  <!-- ============== MAIN ============== -->
   <main class="main">
 
     <div class="topbar">
@@ -1130,7 +1136,6 @@
 
     <div class="content">
 
-      <!-- Editor + LaTeX side by side -->
       <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px;">
 
         <div class="card">
@@ -1173,7 +1178,6 @@
 
       </div>
 
-      <!-- Preview -->
       <div class="card">
         <div class="card-header">
           <div class="card-title">
@@ -1206,10 +1210,8 @@
   </main>
 </div>
 
-<!-- DRAWER BACKDROP -->
 <div class="drawer-backdrop" id="drawer-backdrop"></div>
 
-<!-- BOTTOM SHEET AZIONI -->
 <div class="mobile-actions-sheet" id="mobile-actions-sheet">
   <div class="handle"></div>
   <div class="sheet-title">Azioni</div>
@@ -1262,7 +1264,6 @@
   </div>
 </div>
 
-<!-- ============== MODALE IMPORT ============== -->
 <div class="modal-overlay" id="modal-import">
   <div class="modal">
     <div class="modal-header">
@@ -1289,7 +1290,6 @@
   </div>
 </div>
 
-<!-- ============== MODALE MATRICE ============== -->
 <div class="modal-overlay" id="modal-matrix">
   <div class="modal">
     <div class="modal-header">
